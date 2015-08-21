@@ -105,6 +105,7 @@
 		    background-color: #4D742A;
 		}
 	</style>
+	@yield('head')
 </head>
 <body>
 	<div class="upper"></div>

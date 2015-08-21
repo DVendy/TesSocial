@@ -28,19 +28,19 @@ Route::controllers([
 
 Route::get('/facebook/login', function(SammyK\LaravelFacebookSdk\LaravelFacebookSdk $fb) {
 	$login_url = $fb->getLoginUrl(['email', 'publish_actions'], '/facebook/callback');
-	return redirect($login_url);
+	return redirect($login_url."&display=popup");
 });
 
 Route::get('/facebook/callback', function(SammyK\LaravelFacebookSdk\LaravelFacebookSdk $fb) {
 	$accessToken = null;
 	try {
 		$accessToken = Facebook::getAccessTokenFromRedirect();
-	}catch(Facebook\Exceptions\FacebookSDKException $e){
-		return ('Silahkan login!');
+	}catch(\Facebook\Exceptions\FacebookSDKException $e){
+		return ('Dapet link darimana? :v');
 	}
 
 	if (! $accessToken) {
-		return redirect('account');
+		return ('Login / permission jangan di cancel :v');
 	}
 
 	if (! $accessToken->isLongLived()) {
@@ -51,7 +51,7 @@ Route::get('/facebook/callback', function(SammyK\LaravelFacebookSdk\LaravelFaceb
 		try {
 			$accessToken = $oauth_client->getLongLivedAccessToken($accessToken);
 		} catch (Facebook\Exceptions\FacebookSDKException $e) {
-			return redirect('account');
+			return ('c');
 		}
 	}
 
@@ -61,14 +61,14 @@ Route::get('/facebook/callback', function(SammyK\LaravelFacebookSdk\LaravelFaceb
 
 		// If token expired
 	if(empty($accessToken))
-		return redirect('account');
+		return ('d!');
 	try {
 		$response = Facebook::get('/me?fields=id,name,email');
-	} catch (Facebook\Exceptions\FacebookSDKException $e) {
+	} catch (\Facebook\Exceptions\FacebookSDKException $e) {
 		dd($e->getMessage());
 	}
 
-	$timeline = $response->getGraphObject();
+	$timeline= $response->getGraphObject();
     // var_dump($timeline);
     // die();
 
@@ -88,13 +88,19 @@ Route::get('/facebook/callback', function(SammyK\LaravelFacebookSdk\LaravelFaceb
 		$social->save();
 
 		Auth::login($user);
-		return redirect('/');
+		return "<script>
+            window.close();
+            window.opener.location.reload();
+            </script>";
 	}
 	else{
 		Auth::login($social->user);
 		$social->token = $accessToken;
 		$social->save();
-		return redirect('/');
+		return "<script>
+            window.close();
+            window.opener.location.reload();
+            </script>";
 	}
 
 	//return redirect(action('PageController@term'));
@@ -111,7 +117,7 @@ Route::get('/facebook/post', function(SammyK\LaravelFacebookSdk\LaravelFacebookS
 			if ($key->type = "facebook")
 				$accessToken = $key->token;
 		}
-	}catch(Facebook\Exceptions\FacebookSDKException $e){
+	}catch(\Facebook\Exceptions\FacebookSDKException $e){
 		return redirect('/facebook/login');
 	}
 
@@ -183,10 +189,10 @@ Route::get('/facebook/photo', function(SammyK\LaravelFacebookSdk\LaravelFacebook
 	try {
   // Returns a `Facebook\FacebookResponse` object
 		$response = $fb->post('/me/photos', $data, $accessToken);
-	} catch(Facebook\Exceptions\FacebookResponseException $e) {
+	} catch(\Facebook\Exceptions\FacebookResponseException $e) {
 		echo 'Graph returned an error: ' . $e->getMessage();
 		exit;
-	} catch(Facebook\Exceptions\FacebookSDKException $e) {
+	} catch(\Facebook\Exceptions\FacebookSDKException $e) {
 		echo 'Facebook SDK returned an error: ' . $e->getMessage();
 		exit;
 	}
@@ -350,7 +356,7 @@ Route::get('twitter/pp', function()
 
 Route::get('twitter/banner', function()
 {
-	$contents = Storage::get('e.png');
+	$contents = Storage::get('d.jpg');
     $code = Twitter::request('POST', 'https://api.twitter.com/1.1/account/update_profile_banner.json',
     array( 'banner' => $contents),
     true, // use auth
